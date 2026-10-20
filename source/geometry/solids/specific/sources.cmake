@@ -3,6 +3,8 @@
 # Define the Geant4 Module.
 geant4_add_module(G4specsolids
   PUBLIC_HEADERS
+    G4HalfSurface.hh
+    G4HalfPlane.hh
     G4ClippablePolygon.hh
     G4ClippablePolygon.icc
     G4Ellipsoid.hh
@@ -81,6 +83,8 @@ geant4_add_module(G4specsolids
     G4VTwistSurface.icc
     G4VTwistedFaceted.hh
   SOURCES
+    G4HalfSurface.cc
+    G4HalfPlane.cc
     G4ClippablePolygon.cc
     G4Ellipsoid.cc
     G4EllipticalCone.cc
