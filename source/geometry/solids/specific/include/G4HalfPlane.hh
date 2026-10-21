@@ -14,6 +14,8 @@ public:
     G4HalfPlane(const G4String& name, const G4ThreeVector &normal, const G4double &distance);
     G4double ImplicitFunction(const G4ThreeVector& p) const override;
 
+
+    std::vector<G4ThreeVector> Intersection(const G4ThreeVector& b, const G4ThreeVector& v) override;
     G4double DistanceToIn(const G4ThreeVector& p) const override;
     G4double DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const override;
 
