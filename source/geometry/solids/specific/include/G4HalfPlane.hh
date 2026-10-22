@@ -6,7 +6,6 @@
 
 class G4HalfPlane : public G4HalfSurface
 {
-private:
     G4ThreeVector normal;
     G4double distance;
 
@@ -14,7 +13,7 @@ public:
     G4HalfPlane(const G4ThreeVector& normal, const G4double& distance);
     G4double ImplicitFunction(const G4ThreeVector& p) const override;
 
-    G4ThreeVector SurfaceNormal(const G4ThreeVector& p) const override {return normal;}
+    G4ThreeVector SurfaceNormal(const G4ThreeVector& /*p*/) const override {return normal;}
 
     std::vector<G4ThreeVector> Intersection(const G4ThreeVector& p, const G4ThreeVector& v) override;
 };

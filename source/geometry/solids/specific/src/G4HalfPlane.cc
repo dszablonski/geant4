@@ -1,8 +1,8 @@
 #include "G4HalfPlane.hh"
 
-G4HalfPlane::G4HalfPlane(const G4ThreeVector& normal, const G4double& distance)
-            :normal(normal / normal.mag()),
-             distance(distance) {}
+G4HalfPlane::G4HalfPlane(const G4ThreeVector& normalIn, const G4double& distanceIn)
+            :normal(normalIn / normalIn.mag()),
+             distance(distanceIn) {}
 
 G4double G4HalfPlane::ImplicitFunction(const G4ThreeVector& p) const
 {
