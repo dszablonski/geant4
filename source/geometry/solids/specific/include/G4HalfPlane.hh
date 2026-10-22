@@ -15,7 +15,7 @@ public:
 
     G4ThreeVector SurfaceNormal(const G4ThreeVector& /*p*/) const override {return normal;}
 
-    std::vector<G4ThreeVector> Intersection(const G4ThreeVector& p, const G4ThreeVector& v) override;
+    std::vector<G4ThreeVector> RayIntersection(const G4ThreeVector& p, const G4ThreeVector& v) override;
 };
 
 #endif

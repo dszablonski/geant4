@@ -9,7 +9,7 @@ G4double G4HalfPlane::ImplicitFunction(const G4ThreeVector& p) const
     return normal.dot(p) - distance;
 }
 
-std::vector<G4ThreeVector> G4HalfPlane::Intersection(const G4ThreeVector& p, const G4ThreeVector& v)
+std::vector<G4ThreeVector> G4HalfPlane::RayIntersection(const G4ThreeVector& p, const G4ThreeVector& v)
 {
     if (normal.dot(v) == 0) return {};
     
