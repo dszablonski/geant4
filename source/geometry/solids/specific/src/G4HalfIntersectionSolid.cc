@@ -40,7 +40,7 @@ G4double G4HalfIntersectionSolid::ImplicitFunction(const G4ThreeVector& p) const
 
 G4double G4HalfIntersectionSolid::DistanceToOut(const G4ThreeVector& p) const
 {
-    if (this->Inside(p) == kOutside || this->Inside(p) == kSurface) return 0;
+    if (this->Inside(p) != kInside) return 0;
 
     G4double distanceToOut = -kInfinity;
 
@@ -58,7 +58,7 @@ G4double G4HalfIntersectionSolid::DistanceToOut(const G4ThreeVector& p) const
 
 const G4HalfSurface& G4HalfIntersectionSolid::ClosestSurfaceToOut(const G4ThreeVector& p) const
 { // Determines closest surface when inside (or closest surface you must pass through to be outside)
-    if (this->Inside(p) == kOutside || this->Inside(p) == kSurface)
+    if (this->Inside(p) != kInside)
     {
         throw std::invalid_argument("G4HalfIntersectionSolid::ClosestSurfaceToOut takes kInside points only");
     }
@@ -90,6 +90,25 @@ const G4HalfSurface& G4HalfIntersectionSolid::ClosestSurfaceToOut(const G4ThreeV
     }
 
     return *resultingSurface;
+}
+
+const G4HalfSurface& G4HalfIntersectionSolid::WhatSurfaceAmIOn(const G4ThreeVector& p) const
+{
+    if (this->Inside(p) != kSurface)
+    {
+        throw std::invalid_argument("G4HalfIntersectionSolid::WhatSurfaceAmIOn takes surface points as argument only.");
+    }
+
+    for (const G4HalfSurface* s : intersectionSurfaces_)
+    {
+        if (s->Inside(p) == kSurface) return *s;
+    }
+    for (const G4HalfSurface* s : subtractionSurfaces_)
+    {
+        if (s->Inside(p) == kSurface) return *s;
+    }
+
+    throw std::logic_error("G4HalfIntersectionSolid has no surfaces.");
 }
 
 G4ThreeVector G4HalfIntersectionSolid::SurfaceNormal(const G4ThreeVector& p) const

@@ -29,10 +29,10 @@ public:
                            G4double& pMin, G4double& pMax) const override;
     EInside Inside(const G4ThreeVector& p) const override;
     G4ThreeVector SurfaceNormal(const G4ThreeVector& p) const override;
-    G4double DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const override = 0;
-    G4double DistanceToIn(const G4ThreeVector& p) const override = 0;
+    G4double DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const override;
+    G4double DistanceToIn(const G4ThreeVector& p) const override;
     G4double DistanceToOut(const G4ThreeVector& p, const G4ThreeVector& v, const G4bool calcNorm, G4bool* validNorm,
-                           G4ThreeVector* n) const override = 0;
+                           G4ThreeVector* n) const override;
     G4double DistanceToOut(const G4ThreeVector& p) const override;
     G4GeometryType GetEntityType() const override = 0;
     void DescribeYourselfTo(G4VGraphicsScene& scene) const override;
