@@ -33,3 +33,9 @@ EInside G4HalfSurface::Inside(const G4ThreeVector& p) const
     if (this->ImplicitFunction(p) > 0) return kOutside;
     return kSurface;
 }
+
+std::ostream& G4HalfSurface::StreamInfo(std::ostream& os) const
+{
+    os << "--- Half Surface ---" << std::endl;
+    return os;
+}

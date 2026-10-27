@@ -26,7 +26,7 @@ public:
     // This will involve taking a gradient of the implicit function and evaluating it at p
     virtual G4ThreeVector SurfaceNormal(const G4ThreeVector& /*p*/) const = 0;
 
-    virtual std::ostream StreamInfo(std::ostream&) const;
+    virtual std::ostream& StreamInfo(std::ostream&) const;
 };
 
 #endif

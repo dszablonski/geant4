@@ -115,7 +115,7 @@ G4ThreeVector G4HalfIntersectionSolid::SurfaceNormal(const G4ThreeVector& p) con
 {
     // Determine the closest surface, choose it, and return that surfaces .SurfaceNormal() function
     if (this->Inside(p) == kInside) return ClosestSurfaceToOut(p).SurfaceNormal(p);
-    if (this->Inside(p) == kOutside) return ClosestSurfaceToIn(p).SurfaceNormal(p);
+    //if (this->Inside(p) == kOutside) return ClosestSurfaceToIn(p).SurfaceNormal(p);
     return WhatSurfaceAmIOn(p).SurfaceNormal(p);
 }
 
@@ -130,15 +130,14 @@ EInside G4HalfIntersectionSolid::Inside(const G4ThreeVector& p) const
     if (insideSubtraction) return kOutside;
 
     G4bool insideIntersection = true;
-    G4bool surfaceIntersection = true;
     for (const G4HalfSurface* s : intersectionSurfaces_)
     {
-        surfaceIntersection = surfaceIntersection && s->Inside(p) == kSurface;
+        if (s->Inside(p) == kSurface) return kSurface;
+
         insideIntersection = insideIntersection && s->Inside(p) == kInside;
         if (not insideIntersection) break;
     }
     if (insideIntersection) return kInside;
-    if (surfaceIntersection) return kSurface;
 
     return kOutside;
 }
