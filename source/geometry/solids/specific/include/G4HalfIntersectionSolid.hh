@@ -27,16 +27,16 @@ public:
     // Returning by input argument
     // Inherited functions
     G4bool CalculateExtent(const EAxis pAxis, const G4VoxelLimits& pVoxelLimit, const G4AffineTransform& pTransform,
-                           G4double& pMin, G4double& pMax) const override;
+                           G4double& pMin, G4double& pMax) const override = 0;
     EInside Inside(const G4ThreeVector& p) const override;
     G4ThreeVector SurfaceNormal(const G4ThreeVector& p) const override;
-    G4double DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const override;
-    G4double DistanceToIn(const G4ThreeVector& p) const override;
+    G4double DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const override=0;
+    G4double DistanceToIn(const G4ThreeVector& p) const override=0;
     G4double DistanceToOut(const G4ThreeVector& p, const G4ThreeVector& v, const G4bool calcNorm, G4bool* validNorm,
-                           G4ThreeVector* n) const override;
+                           G4ThreeVector* n) const override=0;
     G4double DistanceToOut(const G4ThreeVector& p) const override;
     G4GeometryType GetEntityType() const override = 0;
-    void DescribeYourselfTo(G4VGraphicsScene& scene) const override;
+    void DescribeYourselfTo(G4VGraphicsScene& scene) const override=0;
     std::ostream& StreamInfo(std::ostream& os) const override;
 };
 
