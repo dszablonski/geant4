@@ -94,14 +94,14 @@ G4double G4HalfIntersectionSolid::DistanceToOut(const G4ThreeVector& p, const G4
     {
         G4double distance = surface->DistanceToSurface(p,v);
         if (distance == kInfinity) continue;
-        G4ThreeVector point = p + vUnit * (distance + kCarTolerance);
+        G4ThreeVector point = p + vUnit * (distance);
 
-        if (this->Inside(point) == kOutside && distance < distanceToOut)
+        if (this->Inside(point + vUnit*kCarTolerance) == kOutside && distance < distanceToOut)
         {
             distanceToOut = distance;
             if (calcNorm)
             {
-                *n = surface->SurfaceNormal(point - vUnit*kCarTolerance);
+                *n = surface->SurfaceNormal(point);
                 *validNorm = true;
             }
         }
@@ -111,14 +111,14 @@ G4double G4HalfIntersectionSolid::DistanceToOut(const G4ThreeVector& p, const G4
     {
         G4double distance = surface->DistanceToSurface(p,v);
         if (distance == kInfinity) continue;
-        G4ThreeVector point = p + vUnit * (distance + kCarTolerance);
+        G4ThreeVector point = p + vUnit * (distance);
 
-        if (this->Inside(point) == kOutside && distance < distanceToOut)
+        if (this->Inside(point + vUnit*kCarTolerance) == kOutside && distance < distanceToOut)
         {
             distanceToOut = distance;
             if (calcNorm)
             {
-                *n = -surface->SurfaceNormal(point - vUnit*kCarTolerance);
+                *n = -surface->SurfaceNormal(point);
                 *validNorm = true;
             }
         }
@@ -176,9 +176,35 @@ G4double G4HalfIntersectionSolid::DistanceToIn(const G4ThreeVector& p, const G4H
 
 G4double G4HalfIntersectionSolid::DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const
 {
-    if (this -> Inside(p) == kInside) return 0;
-
     const G4ThreeVector vUnit = v/v.mag();
+    if (this -> Inside(p) != kOutside) return 0;
+
+    G4double distanceToIn = kInfinity;
+    for (const G4HalfSurface* surface : intersectionSurfaces_)
+    {
+        G4double distance = surface->DistanceToSurface(p,v);
+        if (distance == kInfinity) continue;
+        G4ThreeVector point = p + vUnit * (distance);
+
+        if (this->Inside(point + vUnit*kCarTolerance) == kInside)
+        {
+            distanceToIn = std::min(distanceToIn, distance);
+        }
+    }
+
+    for (const G4HalfSurface* surface : subtractionSurfaces_)
+    {
+        G4double distance = surface->DistanceToSurface(p,v);
+        if (distance == kInfinity) continue;
+        G4ThreeVector point = p + vUnit * (distance);
+
+        if (this->Inside(point + vUnit*kCarTolerance) == kInside)
+        {
+            distanceToIn = std::min(distanceToIn, distance);
+        }
+    }
+
+    return distanceToIn;
 }
 
 
