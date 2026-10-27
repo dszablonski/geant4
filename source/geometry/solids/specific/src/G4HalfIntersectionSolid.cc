@@ -62,7 +62,6 @@ G4double G4HalfIntersectionSolid::DistanceToOut(const G4ThreeVector& p, const G4
     if (this->Inside(p) != kInside) return 0;
 
     G4double distanceToOut = -kInfinity;
-    const G4HalfSurface* surface = nullptr;
 
     for (const G4HalfSurface* surface : intersectionSurfaces_)
     {
@@ -85,6 +84,36 @@ G4double G4HalfIntersectionSolid::DistanceToOut(const G4ThreeVector& p, const G4
     return distanceToOut;
 }
 
+G4double G4HalfIntersectionSolid::DistanceToOut(const G4ThreeVector& p, const G4ThreeVector& v, const G4bool calcNorm, G4bool* validNorm, G4ThreeVector* n) const
+{
+    const G4ThreeVector vUnit = v/v.mag();
+    if (this->Inside(p) != kInside) return 0;
+    G4double distanceToOut = kInfinity;
+
+    for (const G4HalfSurface* surface : intersectionSurfaces_)
+    {
+        G4double distance = surface->DistanceToSurface(p,v);
+        if (distance == kInfinity) continue;
+        G4ThreeVector point = p + vUnit * (distance + kCarTolerance);
+
+        if (this->Inside(point) == kOutside && distance < distanceToOut)
+        {
+            distanceToOut = distance;
+            if (calcNorm)
+            {
+                *n = surface->SurfaceNormal(point - vUnit*kCarTolerance);
+                *validNorm = true;
+            }
+        }
+    }
+
+    return distanceToOut;
+}
+
+G4double G4HalfIntersectionSolid::DistanceToIn(const G4ThreeVector& p, const G4HalfSurface*& s) const
+{
+
+}
 
 const G4HalfSurface& G4HalfIntersectionSolid::WhatSurfaceAmIOn(const G4ThreeVector& p) const
 {

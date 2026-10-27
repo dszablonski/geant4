@@ -22,7 +22,7 @@ public:
 
     const G4HalfSurface& WhatSurfaceAmIOn(const G4ThreeVector& p) const;
 
-    // Inherited functions
+    // --- Inherited functions ---
     G4bool CalculateExtent(const EAxis pAxis, const G4VoxelLimits& pVoxelLimit, const G4AffineTransform& pTransform,
                            G4double& pMin, G4double& pMax) const override = 0;
     EInside Inside(const G4ThreeVector& p) const override;
@@ -38,6 +38,7 @@ public:
                            G4ThreeVector* n) const override =0;
     G4double DistanceToOut(const G4ThreeVector& p) const override;
     G4double DistanceToOut(const G4ThreeVector& p, const G4HalfSurface*& s) const;
+
     G4GeometryType GetEntityType() const override = 0;
     void DescribeYourselfTo(G4VGraphicsScene& scene) const override;
     std::ostream& StreamInfo(std::ostream& os) const override;
