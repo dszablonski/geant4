@@ -30,8 +30,7 @@ public:
     G4ThreeVector SurfaceNormal(const G4ThreeVector& p) const override;
 
     G4double DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const override=0;
-    G4double DistanceToIn(const G4ThreeVector& p) const override=0;
-    // This will allow obtaining the pointer to the surface with the calculated closest distance
+    G4double DistanceToIn(const G4ThreeVector& p) const override;
     G4double DistanceToIn(const G4ThreeVector& p, const G4HalfSurface*& s) const;
 
     G4double DistanceToOut(const G4ThreeVector& p, const G4ThreeVector& v, const G4bool calcNorm, G4bool* validNorm,
