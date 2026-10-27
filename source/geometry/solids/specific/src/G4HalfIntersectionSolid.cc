@@ -131,7 +131,7 @@ G4double G4HalfIntersectionSolid::DistanceToIn(const G4ThreeVector& p) const
 {
     if (this -> Inside(p) == kInside) return 0;
 
-    G4double distanceToIn = kInfinity;
+    G4double distanceToIn = -kInfinity;
 
     for (const G4HalfSurface* surface : intersectionSurfaces_)
     {
@@ -148,8 +148,39 @@ G4double G4HalfIntersectionSolid::DistanceToIn(const G4ThreeVector& p) const
 
 G4double G4HalfIntersectionSolid::DistanceToIn(const G4ThreeVector& p, const G4HalfSurface*& s) const
 {
+    if (this -> Inside(p) == kInside) return 0;
 
+    G4double distanceToIn = -kInfinity;
+    for (const G4HalfSurface* surface : intersectionSurfaces_)
+    {
+        G4double distanceToSurface = surface->DistanceToSurface(p);
+        if (distanceToSurface > distanceToIn)
+        {
+            distanceToIn = distanceToSurface;
+            s = surface;
+        }
+    }
+
+    for (const G4HalfSurface* surface : subtractionSurfaces_)
+    {
+        G4double distanceToSurface = -surface->DistanceToSurface(p);
+        if (distanceToSurface > distanceToIn)
+        {
+            distanceToIn = distanceToSurface;
+            s = surface;
+        }
+    }
+
+    return distanceToIn;
 }
+
+G4double G4HalfIntersectionSolid::DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const
+{
+    if (this -> Inside(p) == kInside) return 0;
+
+    const G4ThreeVector vUnit = v/v.mag();
+}
+
 
 const G4HalfSurface& G4HalfIntersectionSolid::WhatSurfaceAmIOn(const G4ThreeVector& p) const
 {
