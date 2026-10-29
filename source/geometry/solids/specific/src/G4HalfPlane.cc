@@ -1,7 +1,7 @@
 #include "G4HalfPlane.hh"
 
 G4HalfPlane::G4HalfPlane(const G4ThreeVector& normalIn, const G4double& distanceIn)
-            :normal(normalIn / normalIn.mag()),
+            :normal(normalIn.unit()),
              distance(distanceIn) {}
 
 G4double G4HalfPlane::ImplicitFunction(const G4ThreeVector& p) const
@@ -19,7 +19,7 @@ G4double G4HalfPlane::DistanceToSurface(const G4ThreeVector& p) const
 
 G4double G4HalfPlane::DistanceToSurface(const G4ThreeVector& p, const G4ThreeVector& v) const
 {
-    const G4ThreeVector vUnit = v/v.mag();
+    const G4ThreeVector vUnit = v.unit();
 
     G4double projection = normal.dot(vUnit);
     G4double implicitFunction = this->ImplicitFunction(p);
