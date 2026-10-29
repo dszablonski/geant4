@@ -1,7 +1,9 @@
 #include "G4HalfIntersectionSolid.hh"
 #include <algorithm>
 
+#include "G4HalfPlane.hh"
 #include "G4VGraphicsScene.hh"
+#include "G4VoxelLimits.hh"
 
 const G4ThreeVector ORIGIN = {0,0,0};
 
@@ -23,6 +25,15 @@ void G4HalfIntersectionSolid::AddIntersectionSurface(G4HalfSurface& s)
 void G4HalfIntersectionSolid::AddSubtractionSurface(G4HalfSurface& s)
 {
     subtractionSurfaces_.push_back(&s);
+}
+
+G4double G4HalfIntersectionSolid::Subtraction(const G4ThreeVector& p, const G4HalfIntersectionSolid& subtraction) const
+{
+    G4double implicitFunction = this->ImplicitFunction(p);
+
+    implicitFunction = std::max(implicitFunction, -subtraction.ImplicitFunction(p));
+
+    return implicitFunction;
 }
 
 G4double G4HalfIntersectionSolid::ImplicitFunction(const G4ThreeVector& p) const
@@ -282,22 +293,41 @@ G4bool G4HalfIntersectionSolid::CalculateExtent(const EAxis pAxis, const G4Voxel
         throw std::invalid_argument("G4HalfIntersectionSolid::CalculateExtent: invalid pAxis.");
     }
 
+    G4HalfPlane voxelLimitPlanePosX({+1,0,0}, pVoxelLimit.GetMaxXExtent());
+    G4HalfPlane voxelLimitPlaneNegX({-1,0,0}, pVoxelLimit.GetMinXExtent());
+    G4HalfPlane voxelLimitPlanePosY({0,+1,0}, pVoxelLimit.GetMaxYExtent());
+    G4HalfPlane voxelLimitPlaneNegY({0,-1,0}, pVoxelLimit.GetMinYExtent());
+    G4HalfPlane voxelLimitPlanePosZ({0,0,+1}, pVoxelLimit.GetMaxZExtent());
+    G4HalfPlane voxelLimitPlaneNegZ({0,0,-1}, pVoxelLimit.GetMinZExtent());
+
+    std::vector<G4HalfSurface*> voxelLimits =
+        {
+        &voxelLimitPlanePosX, &voxelLimitPlanePosY, &voxelLimitPlanePosZ,
+        &voxelLimitPlaneNegX, &voxelLimitPlaneNegY, &voxelLimitPlaneNegZ
+        };
+
+    std::vector<G4HalfSurface*> nA;
+
+    G4HalfIntersectionSolid voxelLimitCube(voxelLimits, nA, "VoxelLimitCube");
+
     G4ThreeVector axisRayVPos = ORIGIN;
     G4ThreeVector axisRayVNeg = ORIGIN;
 
     axisRayVPos[pAxis] = 1;
     axisRayVNeg[pAxis] = -1;
 
-    std::vector<G4ThreeVector> axisIntersections;
+    std::vector<G4ThreeVector> axisIntersectionsPos;
+    std::vector<G4ThreeVector> axisIntersectionsNeg;
 
+    // Obtain intersections through all surfaces
     for (G4HalfSurface* s: intersectionSurfaces_)
     {
         std::vector<G4ThreeVector> surfaceIntersectionsPos = s->RayIntersection(ORIGIN, axisRayVPos);
         std::vector<G4ThreeVector> surfaceIntersectionsNeg = s->RayIntersection(ORIGIN, axisRayVNeg);
 
-        axisIntersections.insert(axisIntersections.begin(),
+        axisIntersectionsPos.insert(axisIntersectionsPos.begin(),
             surfaceIntersectionsPos.begin(),surfaceIntersectionsPos.end());
-        axisIntersections.insert(axisIntersections.begin(),
+        axisIntersectionsNeg.insert(axisIntersectionsNeg.begin(),
             surfaceIntersectionsNeg.begin(),surfaceIntersectionsNeg.end());
     }
     for (G4HalfSurface* s: subtractionSurfaces_)
@@ -305,17 +335,29 @@ G4bool G4HalfIntersectionSolid::CalculateExtent(const EAxis pAxis, const G4Voxel
         std::vector<G4ThreeVector> surfaceIntersectionsPos = s->RayIntersection(ORIGIN, axisRayVPos);
         std::vector<G4ThreeVector> surfaceIntersectionsNeg = s->RayIntersection(ORIGIN, axisRayVNeg);
 
-        axisIntersections.insert(axisIntersections.begin(),
+        axisIntersectionsPos.insert(axisIntersectionsPos.begin(),
             surfaceIntersectionsPos.begin(),surfaceIntersectionsPos.end());
-        axisIntersections.insert(axisIntersections.begin(),
+        axisIntersectionsNeg.insert(axisIntersectionsNeg.begin(),
             surfaceIntersectionsNeg.begin(),surfaceIntersectionsNeg.end());
     }
 
-    if (axisIntersections.empty()) return false;
+    if (axisIntersectionsNeg.empty() && axisIntersectionsPos.empty()) return false;
+    
 
-    pMin = -kInfinity;
-    pMax = kInfinity;
-    for (G4ThreeVector intersectionPoint : axisIntersections)
+    std::vector<G4ThreeVector> validIntersections;
+    for (G4ThreeVector& intersectionPoint : axisIntersectionsPos)
+    {
+        if (voxelLimitCube.Inside(intersectionPoint) == kInside) continue;
+        if (this->Inside(intersectionPoint) != kSurface) continue;
+        validIntersections.push_back(intersectionPoint);
+    }
+
+    if (validIntersections.empty()) return false;
+
+    pMin = pVoxelLimit.GetMinExtent(pAxis);
+    pMax = pVoxelLimit.GetMaxExtent(pAxis);
+
+    for (G4ThreeVector intersectionPoint : validIntersections)
     {
         pMin = std::min(pMin,intersectionPoint[pAxis]);
         pMax = std::max(pMax,intersectionPoint[pAxis]);

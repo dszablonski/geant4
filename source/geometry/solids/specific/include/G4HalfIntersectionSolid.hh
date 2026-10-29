@@ -20,11 +20,14 @@ public:
 
     G4double ImplicitFunction(const G4ThreeVector &p) const;
 
+    // Provides a new implicit function for a subtraction with a solid
+    G4double Subtraction(const G4ThreeVector& p, const G4HalfIntersectionSolid& subtraction) const;
+
     const G4HalfSurface& WhatSurfaceAmIOn(const G4ThreeVector& p) const;
 
     // --- Inherited functions ---
     G4bool CalculateExtent(const EAxis pAxis, const G4VoxelLimits& pVoxelLimit, const G4AffineTransform& pTransform,
-                           G4double& pMin, G4double& pMax) const override = 0;
+                           G4double& pMin, G4double& pMax) const override;
 
     EInside Inside(const G4ThreeVector& p) const override;
 
