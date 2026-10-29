@@ -13,7 +13,7 @@ class G4HalfIntersectionSolid : public G4VSolid
 public:
     G4HalfIntersectionSolid(const std::vector<const G4HalfSurface*>& intersectionSurfaces,
                             const std::vector<const G4HalfSurface*>& subtractionSurfaces,
-                            const G4String& name);
+                            const G4String& name = "G4HalfIntersectionSolid");
 
     void AddIntersectionSurface(const G4HalfSurface& s);
     void AddSubtractionSurface(const G4HalfSurface& s);
@@ -25,6 +25,7 @@ public:
     // --- Inherited functions ---
     G4bool CalculateExtent(const EAxis pAxis, const G4VoxelLimits& pVoxelLimit, const G4AffineTransform& pTransform,
                            G4double& pMin, G4double& pMax) const override = 0;
+
     EInside Inside(const G4ThreeVector& p) const override;
 
     G4ThreeVector SurfaceNormal(const G4ThreeVector& p) const override;
@@ -34,11 +35,11 @@ public:
     G4double DistanceToIn(const G4ThreeVector& p, const G4HalfSurface*& s) const;
 
     G4double DistanceToOut(const G4ThreeVector& p, const G4ThreeVector& v, const G4bool calcNorm, G4bool* validNorm,
-                           G4ThreeVector* n) const override =0;
+                           G4ThreeVector* n) const override;
     G4double DistanceToOut(const G4ThreeVector& p) const override;
     G4double DistanceToOut(const G4ThreeVector& p, const G4HalfSurface*& s) const;
 
-    G4GeometryType GetEntityType() const override = 0;
+    G4GeometryType GetEntityType() const override;
     void DescribeYourselfTo(G4VGraphicsScene& scene) const override;
     std::ostream& StreamInfo(std::ostream& os) const override;
 };

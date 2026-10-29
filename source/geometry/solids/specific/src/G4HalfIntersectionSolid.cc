@@ -270,6 +270,11 @@ EInside G4HalfIntersectionSolid::Inside(const G4ThreeVector& p) const
     return kOutside;
 }
 
+G4GeometryType G4HalfIntersectionSolid::GetEntityType() const
+{
+    return "G4HalfIntersectionSolid";
+}
+
 void G4HalfIntersectionSolid::DescribeYourselfTo(G4VGraphicsScene& scene) const
 {
     // Standard implementation as suggested by CoPilot
