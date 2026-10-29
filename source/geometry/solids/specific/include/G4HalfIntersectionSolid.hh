@@ -15,8 +15,8 @@ public:
                             const std::vector<G4HalfSurface*>& subtractionSurfaces,
                             const G4String& name = "G4HalfIntersectionSolid");
 
-    void AddIntersectionSurface(const G4HalfSurface& s);
-    void AddSubtractionSurface(const G4HalfSurface& s);
+    void AddIntersectionSurface(G4HalfSurface& s);
+    void AddSubtractionSurface(G4HalfSurface& s);
 
     G4double ImplicitFunction(const G4ThreeVector &p) const;
 

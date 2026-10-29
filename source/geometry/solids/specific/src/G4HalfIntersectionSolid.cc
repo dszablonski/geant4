@@ -3,6 +3,8 @@
 
 #include "G4VGraphicsScene.hh"
 
+const G4ThreeVector ORIGIN = {0,0,0};
+
 G4HalfIntersectionSolid::G4HalfIntersectionSolid(const std::vector<G4HalfSurface*>& intersectionSurfaces,
                                                  const std::vector<G4HalfSurface*>& subtractionSurfaces,
                                                  const G4String& name)
@@ -13,12 +15,12 @@ G4HalfIntersectionSolid::G4HalfIntersectionSolid(const std::vector<G4HalfSurface
 {
 }
 
-void G4HalfIntersectionSolid::AddIntersectionSurface(const G4HalfSurface& s)
+void G4HalfIntersectionSolid::AddIntersectionSurface(G4HalfSurface& s)
 {
     intersectionSurfaces_.push_back(&s);
 }
 
-void G4HalfIntersectionSolid::AddSubtractionSurface(const G4HalfSurface& s)
+void G4HalfIntersectionSolid::AddSubtractionSurface(G4HalfSurface& s)
 {
     subtractionSurfaces_.push_back(&s);
 }
@@ -249,24 +251,8 @@ G4ThreeVector G4HalfIntersectionSolid::SurfaceNormal(const G4ThreeVector& p) con
 
 EInside G4HalfIntersectionSolid::Inside(const G4ThreeVector& p) const
 {
-    G4bool insideSubtraction = true;
-    for (const G4HalfSurface* s : subtractionSurfaces_)
-    {
-        insideSubtraction = insideSubtraction && s->Inside(p) == kInside;
-        if (not insideSubtraction) break; // Quit looping if not inside all subtractions
-    }
-    if (insideSubtraction) return kOutside;
-
-    G4bool insideIntersection = true;
-    for (const G4HalfSurface* s : intersectionSurfaces_)
-    {
-        if (s->Inside(p) == kSurface) return kSurface;
-
-        insideIntersection = insideIntersection && s->Inside(p) == kInside;
-        if (not insideIntersection) break;
-    }
-    if (insideIntersection) return kInside;
-
+    if (this->ImplicitFunction(p) < -kCarTolerance) return kInside;
+    if (this->ImplicitFunction(p) > kCarTolerance) return kInside;
     return kOutside;
 }
 
@@ -283,11 +269,59 @@ void G4HalfIntersectionSolid::DescribeYourselfTo(G4VGraphicsScene& scene) const
 
 G4bool G4HalfIntersectionSolid::CalculateExtent(const EAxis pAxis, const G4VoxelLimits& pVoxelLimit, const G4AffineTransform& pTransform, G4double& pMin, G4double& pMax) const
 {
-    for (G4HalfSurface* s : intersectionSurfaces_)
+    for (G4HalfSurface* s : intersectionSurfaces_) s->Transform(pTransform);
+    for (G4HalfSurface* s : subtractionSurfaces_) s->Transform(pTransform);
+
+    if (pAxis == kUndefined)
     {
-        s->Transform(pTransform);
+        throw std::invalid_argument("G4HalfIntersectionSolid::CalculateExtent: pAxis is undefined.");
     }
-    for (const G4HalfSurface* s : subtractionSurfaces_)
+
+    if (pAxis > 2)
+    {
+        throw std::invalid_argument("G4HalfIntersectionSolid::CalculateExtent: invalid pAxis.");
+    }
+
+    G4ThreeVector axisRayVPos = ORIGIN;
+    G4ThreeVector axisRayVNeg = ORIGIN;
+
+    axisRayVPos[pAxis] = 1;
+    axisRayVNeg[pAxis] = -1;
+
+    std::vector<G4ThreeVector> axisIntersections;
+
+    for (G4HalfSurface* s: intersectionSurfaces_)
+    {
+        std::vector<G4ThreeVector> surfaceIntersectionsPos = s->RayIntersection(ORIGIN, axisRayVPos);
+        std::vector<G4ThreeVector> surfaceIntersectionsNeg = s->RayIntersection(ORIGIN, axisRayVNeg);
+
+        axisIntersections.insert(axisIntersections.begin(),
+            surfaceIntersectionsPos.begin(),surfaceIntersectionsPos.end());
+        axisIntersections.insert(axisIntersections.begin(),
+            surfaceIntersectionsNeg.begin(),surfaceIntersectionsNeg.end());
+    }
+    for (G4HalfSurface* s: subtractionSurfaces_)
+    {
+        std::vector<G4ThreeVector> surfaceIntersectionsPos = s->RayIntersection(ORIGIN, axisRayVPos);
+        std::vector<G4ThreeVector> surfaceIntersectionsNeg = s->RayIntersection(ORIGIN, axisRayVNeg);
+
+        axisIntersections.insert(axisIntersections.begin(),
+            surfaceIntersectionsPos.begin(),surfaceIntersectionsPos.end());
+        axisIntersections.insert(axisIntersections.begin(),
+            surfaceIntersectionsNeg.begin(),surfaceIntersectionsNeg.end());
+    }
+
+    if (axisIntersections.empty()) return false;
+
+    pMin = -kInfinity;
+    pMax = kInfinity;
+    for (G4ThreeVector intersectionPoint : axisIntersections)
+    {
+        pMin = std::min(pMin,intersectionPoint[pAxis]);
+        pMax = std::max(pMax,intersectionPoint[pAxis]);
+    }
+
+    return true;
 }
 
 std::ostream& G4HalfIntersectionSolid::StreamInfo(std::ostream& os) const
