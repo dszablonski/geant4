@@ -31,14 +31,11 @@ G4double G4HalfPlane::DistanceToSurface(const G4ThreeVector& p, const G4ThreeVec
     return -implicitFunction/projection;
 }
 
-void G4HalfPlane::Translate(const G4ThreeVector& translation)
+void G4HalfPlane::Transform(G4AffineTransform& t)
 {
-    this->distance += this->normal.dot(translation);
-}
+    const G4ThreeVector& normalPoint = this->distance*this->normal;
+    const G4ThreeVector& transformedPoint = t.TransformPoint(normalPoint);
 
-void G4HalfPlane::Rotation(const G4RotationMatrix& rotation, const G4ThreeVector& center)
-{
-    this->Translate(center);
-    this->normal = rotation * center;
-    this->Translate(-center);
+    this->normal = t.TransformAxis(normal).unit();
+    this->distance = normal.dot(transformedPoint);
 }

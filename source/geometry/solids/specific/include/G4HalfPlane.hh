@@ -18,8 +18,7 @@ public:
     G4double DistanceToSurface(const G4ThreeVector& p) const override;
     G4double DistanceToSurface(const G4ThreeVector& p, const G4ThreeVector& v) const override;
 
-    void Translate(const G4ThreeVector& translation) override;
-    void Rotation(const G4RotationMatrix& rotation, const G4ThreeVector& center = {0,0,0}) override;
+    void Transform(G4AffineTransform& t) override;
 };
 
 #endif
