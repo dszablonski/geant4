@@ -3,8 +3,8 @@
 
 #include "G4VGraphicsScene.hh"
 
-G4HalfIntersectionSolid::G4HalfIntersectionSolid(const std::vector<const G4HalfSurface*>& intersectionSurfaces,
-                                                 const std::vector<const G4HalfSurface*>& subtractionSurfaces,
+G4HalfIntersectionSolid::G4HalfIntersectionSolid(const std::vector<G4HalfSurface*>& intersectionSurfaces,
+                                                 const std::vector<G4HalfSurface*>& subtractionSurfaces,
                                                  const G4String& name)
                                                      :  G4VSolid(name),
                                                         intersectionSurfaces_(intersectionSurfaces),
@@ -279,6 +279,15 @@ void G4HalfIntersectionSolid::DescribeYourselfTo(G4VGraphicsScene& scene) const
 {
     // Standard implementation as suggested by CoPilot
     scene.AddSolid(*this);
+}
+
+G4bool G4HalfIntersectionSolid::CalculateExtent(const EAxis pAxis, const G4VoxelLimits& pVoxelLimit, const G4AffineTransform& pTransform, G4double& pMin, G4double& pMax) const
+{
+    for (G4HalfSurface* s : intersectionSurfaces_)
+    {
+        s->Transform(pTransform);
+    }
+    for (const G4HalfSurface* s : subtractionSurfaces_)
 }
 
 std::ostream& G4HalfIntersectionSolid::StreamInfo(std::ostream& os) const

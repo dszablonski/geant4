@@ -31,7 +31,7 @@ G4double G4HalfPlane::DistanceToSurface(const G4ThreeVector& p, const G4ThreeVec
     return -implicitFunction/projection;
 }
 
-void G4HalfPlane::Transform(G4AffineTransform& t)
+void G4HalfPlane::Transform(const G4AffineTransform& t)
 {
     const G4ThreeVector& normalPoint = this->distance*this->normal;
     const G4ThreeVector& transformedPoint = t.TransformPoint(normalPoint);

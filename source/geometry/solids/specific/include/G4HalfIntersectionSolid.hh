@@ -7,12 +7,12 @@
 
 class G4HalfIntersectionSolid : public G4VSolid
 {
-    std::vector<const G4HalfSurface*> intersectionSurfaces_;
-    std::vector<const G4HalfSurface*> subtractionSurfaces_;
+    std::vector<G4HalfSurface*> intersectionSurfaces_;
+    std::vector<G4HalfSurface*> subtractionSurfaces_;
 
 public:
-    G4HalfIntersectionSolid(const std::vector<const G4HalfSurface*>& intersectionSurfaces,
-                            const std::vector<const G4HalfSurface*>& subtractionSurfaces,
+    G4HalfIntersectionSolid(const std::vector<G4HalfSurface*>& intersectionSurfaces,
+                            const std::vector<G4HalfSurface*>& subtractionSurfaces,
                             const G4String& name = "G4HalfIntersectionSolid");
 
     void AddIntersectionSurface(const G4HalfSurface& s);
@@ -30,7 +30,7 @@ public:
 
     G4ThreeVector SurfaceNormal(const G4ThreeVector& p) const override;
 
-    G4double DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const override=0;
+    G4double DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& v) const override;
     G4double DistanceToIn(const G4ThreeVector& p) const override;
     G4double DistanceToIn(const G4ThreeVector& p, const G4HalfSurface*& s) const;
 
