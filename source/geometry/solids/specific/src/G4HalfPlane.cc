@@ -9,6 +9,17 @@ G4double G4HalfPlane::ImplicitFunction(const G4ThreeVector& p) const
     return normal.dot(p) - distance;
 }
 
+std::vector<G4ThreeVector> G4HalfPlane::RayIntersection(const G4ThreeVector& p, const G4ThreeVector& v) const
+{
+    const G4ThreeVector vUnit = v/v.mag();
+
+    const G4double distanceToSurface = this->DistanceToSurface(p,v);
+
+    if (distanceToSurface == kInfinity && this->Inside(p) == kSurface) return {p};
+    if (distanceToSurface == kInfinity) return {};
+
+    return {vUnit*distanceToSurface + p};
+}
 
 // Returns the signed distance to surface
 G4double G4HalfPlane::DistanceToSurface(const G4ThreeVector& p) const
@@ -24,6 +35,7 @@ G4double G4HalfPlane::DistanceToSurface(const G4ThreeVector& p, const G4ThreeVec
     G4double projection = normal.dot(vUnit);
     G4double implicitFunction = this->ImplicitFunction(p);
 
+    if (this->Inside(p) == kSurface) return 0;
     if (projection < 0 && implicitFunction < 0) return kInfinity;
     if (projection > 0 && implicitFunction > 0) return kInfinity;
     if (projection == 0) return kInfinity; // Parallel to plane

@@ -6,25 +6,9 @@ G4double G4HalfSurface::Union(const G4ThreeVector& p, const G4HalfSurface& surfa
     return std::min(this->ImplicitFunction(p), surface.ImplicitFunction(p));
 }
 
-G4double G4HalfSurface::Intersection(const G4ThreeVector& p, const G4HalfSurface& surface) const
-{
-    return std::max(this->ImplicitFunction(p), surface.ImplicitFunction(p));
-}
-
 G4double G4HalfSurface::Subtraction(const G4ThreeVector& p, const G4HalfSurface& surface) const
 {
     return std::max(this->ImplicitFunction(p), -1*surface.ImplicitFunction(p));
-}
-
-std::vector<G4ThreeVector> G4HalfSurface::RayIntersection(const G4ThreeVector& p, const G4ThreeVector& v)
-{
-    const G4ThreeVector vUnit = v/v.mag();
-
-    const G4double distanceToSurface = this->DistanceToSurface(p,v);
-
-    if (distanceToSurface == kInfinity) return {};
-
-    return {vUnit*distanceToSurface + p};
 }
 
 EInside G4HalfSurface::Inside(const G4ThreeVector& p) const

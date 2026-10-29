@@ -17,6 +17,7 @@ public:
 
     G4double DistanceToSurface(const G4ThreeVector& p) const override;
     G4double DistanceToSurface(const G4ThreeVector& p, const G4ThreeVector& v) const override;
+    std::vector<G4ThreeVector> RayIntersection(const G4ThreeVector& p, const G4ThreeVector& v) const override;
 
     void Transform(const G4AffineTransform& t) override;
 };
