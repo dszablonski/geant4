@@ -2,6 +2,10 @@
 
 #include "G4VGraphicsScene.hh"
 
+G4HalfUnionSolid::G4HalfUnionSolid(const G4String& name) : G4HalfSolid(name)
+{
+}
+
 G4HalfUnionSolid::G4HalfUnionSolid(std::vector<std::unique_ptr<G4HalfSolid>> intersectionSolids,
                                    std::vector<std::unique_ptr<G4HalfSolid>> subtractionSolids,
                                    const G4String& name)
@@ -10,16 +14,6 @@ G4HalfUnionSolid::G4HalfUnionSolid(std::vector<std::unique_ptr<G4HalfSolid>> int
                                          subtractionSolids_(std::move(subtractionSolids))
 
 {
-}
-
-void G4HalfUnionSolid::AddIntersectionSolid(std::unique_ptr<G4HalfIntersectionSolid> s)
-{
-    intersectionSolids_.push_back(std::move(s));
-}
-
-void G4HalfUnionSolid::AddSubtractionSolid(std::unique_ptr<G4HalfIntersectionSolid> s)
-{
-    subtractionSolids_.push_back(std::move(s));
 }
 
 G4double G4HalfUnionSolid::ImplicitFunction(const G4ThreeVector& p) const
@@ -46,13 +40,29 @@ void G4HalfUnionSolid::GetPotentialRayIntersections(const G4ThreeVector& p, cons
     std::vector<RayHit>& hits, const G4bool keepOnlySolidHits) const
 {
     if (v.mag() == 0) throw std::logic_error("Cannot pass zero magnitude unit vector");
+
     const G4ThreeVector vUnit = v.unit();
+    std::vector<RayHit> solidHits;
 
-    for (const auto &solid : intersectionSolids_)
-        solid->GetPotentialRayIntersections(p, vUnit, hits, keepOnlySolidHits);
+    auto appendHits = [&](const std::vector<std::unique_ptr<G4HalfSolid>>& solids,
+                          const G4bool subtraction)
+    {
+        for (const auto& solid : solids) {
+            solidHits.clear();
+            solid->GetPotentialRayIntersections(p, vUnit, solidHits, false);
 
-    for (const auto &solid : subtractionSolids_)
-        solid->GetPotentialRayIntersections(p, vUnit, hits, keepOnlySolidHits);
+            for (RayHit& hit : solidHits) {
+                if (subtraction) hit.isSubtraction = !hit.isSubtraction;
+
+                if (keepOnlySolidHits && Inside(hit.intersection) != kSurface) continue;
+
+                hits.push_back(hit);
+            }
+        }
+    };
+
+    appendHits(intersectionSolids_, false);
+    appendHits(subtractionSolids_, true);
 
     std::sort(hits.begin(), hits.end(),
             [](const RayHit& a, const RayHit& b)
