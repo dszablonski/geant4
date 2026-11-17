@@ -5,6 +5,7 @@
 #include "G4HalfSolid.hh"
 #include <vector>
 #include <memory>
+#include <utility>
 #include "G4VSolid.hh"
 
 class G4HalfIntersectionSolid : public G4HalfSolid
@@ -19,12 +20,29 @@ public:
     using G4HalfSolid::DistanceToIn;
     using G4HalfSolid::DistanceToOut;
 
+    explicit G4HalfIntersectionSolid(const G4String& name = "G4HalfIntersectionSolid"); // Name only constructor
     G4HalfIntersectionSolid(std::vector<std::unique_ptr<G4HalfSurface>> intersectionSurfaces,
                             std::vector<std::unique_ptr<G4HalfSurface>> subtractionSurfaces,
                             const G4String& name = "G4HalfIntersectionSolid");
 
-    void AddIntersectionSurface(std::unique_ptr<G4HalfSurface> s);
-    void AddSubtractionSurface(std::unique_ptr<G4HalfSurface> s);
+    // Prevents user from having to use smart pointers
+    template <typename Surface, typename... Args> // Needs to be implemetned in header or you get linker errors at runtime
+    Surface& AddIntersectionSurface(Args&&... args)
+    {
+        auto surface = std::make_unique<Surface>(std::forward<Args>(args)...);
+        Surface& result = *surface;
+        intersectionSurfaces_.push_back(std::move(surface));
+        return result;
+    }
+
+    template <typename Surface, typename... Args>
+    Surface& AddSubtractionSurface(Args&&... args)
+    {
+        auto surface = std::make_unique<Surface>(std::forward<Args>(args)...);
+        Surface& result = *surface;
+        subtractionSurfaces_.push_back(std::move(surface));
+        return result;
+    }
 
     G4double ImplicitFunction(const G4ThreeVector &p) const override;
 
