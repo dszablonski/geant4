@@ -61,7 +61,10 @@ G4double G4HalfSolid::DistanceToIn(const G4ThreeVector& p, const G4ThreeVector& 
         const G4ThreeVector before = hit.intersection - vUnit*kCarTolerance*2;
         const G4ThreeVector after = hit.intersection + vUnit*kCarTolerance*2;
 
-        if (this->Inside(before) == kOutside && this->Inside(after) == kInside)
+        const G4double beforeValue = ImplicitFunction(before);
+        const G4double afterValue = ImplicitFunction(after);
+
+        if (beforeValue > 0.0 && afterValue < 0.0)
             return hit.distance;
     }
 
@@ -87,8 +90,10 @@ G4double G4HalfSolid::DistanceToOut(const G4ThreeVector& p, const G4ThreeVector&
         const G4ThreeVector before = hit.intersection - vUnit*kCarTolerance*2;
         const G4ThreeVector after = hit.intersection + vUnit*kCarTolerance*2;
 
+        const G4double beforeValue = ImplicitFunction(before);
+        const G4double afterValue = ImplicitFunction(after);
 
-        if (this->Inside(before) == kInside && this->Inside(after) == kOutside)
+        if (beforeValue < 0.0 && afterValue > 0.0)
         {
 
             if (calcNorm && n != nullptr)
