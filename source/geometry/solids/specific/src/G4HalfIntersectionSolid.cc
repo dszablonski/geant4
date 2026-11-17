@@ -7,6 +7,10 @@
 
 const G4ThreeVector ORIGIN = {0,0,0};
 
+G4HalfIntersectionSolid::G4HalfIntersectionSolid(const G4String& name) : G4HalfSolid(name)
+{
+}
+
 G4HalfIntersectionSolid::G4HalfIntersectionSolid(std::vector<std::unique_ptr<G4HalfSurface>> intersectionSurfaces,
                                                  std::vector<std::unique_ptr<G4HalfSurface>> subtractionSurfaces,
                                                  const G4String& name)
@@ -17,17 +21,6 @@ G4HalfIntersectionSolid::G4HalfIntersectionSolid(std::vector<std::unique_ptr<G4H
 {
 }
 
-
-void G4HalfIntersectionSolid::AddIntersectionSurface(std::unique_ptr<G4HalfSurface> s)
-{
-    intersectionSurfaces_.push_back(std::move(s));
-}
-
-
-void G4HalfIntersectionSolid::AddSubtractionSurface(std::unique_ptr<G4HalfSurface> s)
-{
-    subtractionSurfaces_.push_back(std::move(s));
-}
 
 G4double G4HalfIntersectionSolid::ImplicitFunction(const G4ThreeVector &p) const
 {
@@ -56,8 +49,6 @@ void G4HalfIntersectionSolid::GetPotentialRayIntersections(const G4ThreeVector& 
 
     auto getHits = [&](const std::unique_ptr<G4HalfSurface> &s, const G4bool subtraction)
     {
-        std::vector<RayHit> surfaceHits;
-
         for (const G4ThreeVector& intersection : s->RayIntersection(p,vUnit))
         {
             if (keepOnlySolidHits && this->Inside(intersection) != kSurface) continue;
@@ -68,23 +59,16 @@ void G4HalfIntersectionSolid::GetPotentialRayIntersections(const G4ThreeVector& 
             hit.targetSurface = s.get();
             hit.isSubtraction = subtraction;
 
-            surfaceHits.push_back(hit);
+            hits.push_back(hit);
         }
-
-        return surfaceHits;
     };
 
     for (const auto &s : intersectionSurfaces_)
-    {
-        std::vector<RayHit> intersectionHits = getHits(s, false);
-        hits.insert(hits.end(), intersectionHits.begin(), intersectionHits.end());
-    }
+        getHits(s, false);
+
 
     for (const auto &s : subtractionSurfaces_)
-    {
-        std::vector<RayHit> subtractionHits = getHits(s, true);
-        hits.insert(hits.end(), subtractionHits.begin(), subtractionHits.end());
-    }
+        getHits(s, true);
 
     std::sort(hits.begin(), hits.end(),
         [](const RayHit& a, const RayHit& b)
@@ -198,7 +182,7 @@ void G4HalfIntersectionSolid::DescribeYourselfTo(G4VGraphicsScene& scene) const
 
 G4bool G4HalfIntersectionSolid::CalculateExtent(const EAxis pAxis, const G4VoxelLimits& pVoxelLimit, const G4AffineTransform& pTransform, G4double& pMin, G4double& pMax) const
 {
-    return true;
+    return false;
 }
 
 std::ostream& G4HalfIntersectionSolid::StreamInfo(std::ostream& os) const
